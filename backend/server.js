@@ -16,15 +16,19 @@ app.get('/', (req, res) => {
 })
 
 app.post('/generate-questions', async (req, res) => {
-  const { role, numQuestions } = req.body
+  const { role, numQuestions, interviewType } = req.body
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3.6-flash',
-      contents: `Generate ${numQuestions} interview questions for a ${role} job interview. Return them as a plain numbered list, nothing else.`,
+      contents: `Generate ${numQuestions} interview questions for a ${interviewType} ${role} job interview. Keep the difficulty and expectations appropriate for a ${interviewType} candidate. Return ONLY a JSON array of strings, with no extra text, no markdown formatting. Example: ["question 1", "question 2"]`,
     })
 
-    res.json({ questions: response.text })
+    const cleanedText = response.text.replace(/```json|```/g, '').trim()
+    console.log('RAW AI RESPONSE:', cleanedText)
+    console.log('TYPE AFTER FIRST PARSE:', typeof JSON.parse(cleanedText))
+    const questionsArray = JSON.parse(cleanedText)
+    res.json({ questions: questionsArray })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Failed to generate questions' })
