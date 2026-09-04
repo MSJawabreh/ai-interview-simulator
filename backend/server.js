@@ -1,8 +1,11 @@
+const cors = require('cors')
+
 require('dotenv').config()
 const express = require('express')
 const { GoogleGenAI } = require('@google/genai')
 
 const app = express()
+app.use(cors())
 app.use(express.json())
 const PORT = 3000
 
@@ -13,12 +16,12 @@ app.get('/', (req, res) => {
 })
 
 app.post('/generate-questions', async (req, res) => {
-  const { role } = req.body
+  const { role, numQuestions } = req.body
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3.6-flash',
-      contents: `Generate 3 interview questions for a ${role} job interview. Return them as a plain numbered list, nothing else.`,
+      contents: `Generate ${numQuestions} interview questions for a ${role} job interview. Return them as a plain numbered list, nothing else.`,
     })
 
     res.json({ questions: response.text })

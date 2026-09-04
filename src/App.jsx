@@ -6,17 +6,17 @@ function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answer, setAnswer] = useState('')
 
-  const questions = [
-    "Tell me about yourself.",
-    "What's a challenging bug you've fixed?",
-    "Why do you want this role?"
-  ]
+  const [questions, setQuestions] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const [numQuestions, setNumQuestions] = useState(3)
 
   if (!selectedRole) {
     return (
       <div>
         <h1>AI Interview Simulator</h1>
         <p>Practice interviews with AI.</p>
+        {isLoading && <p>Generating questions...</p>}
         <h2>Enter a role:</h2>
         <input
           type="text"
@@ -24,7 +24,34 @@ function App() {
           onChange={(e) => setRole(e.target.value)}
           placeholder="e.g. Frontend Developer"
         />
-        <button onClick={() => setSelectedRole(role)}>Start Interview</button>
+
+        <h2>How many questions?</h2>
+        <input
+          type="number"
+          value={numQuestions}
+          onChange={(e) => setNumQuestions(Number(e.target.value))}
+          min="1"
+          max="10"
+        />
+
+        <button onClick={async () => {
+          setIsLoading(true)
+          setSelectedRole(role)
+
+          const response = await fetch('http://localhost:3000/generate-questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: role, numQuestions: numQuestions })
+          })
+
+          const data = await response.json()
+          const questionList = data.questions.split('\n').filter(q => q.trim() !== '')
+
+          setQuestions(questionList)
+          setIsLoading(false)
+        }}>
+          Start Interview
+        </button>
       </div>
     )
   }
