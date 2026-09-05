@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import FocusedLayout from '../components/FocusedLayout'
+import { API_URL } from '../config'
+
 
 function InterviewPage() {
   const location = useLocation()
@@ -29,13 +31,17 @@ function InterviewPage() {
     const currentQuestion = questions[currentQuestionIndex]
 
     try {
-      const response = await fetch('http://localhost:3000/evaluate-answer', {
+      const response = await fetch(`${API_URL}/evaluate-answer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role, question: currentQuestion, answer })
       })
 
       const evaluation = await response.json()
+
+      if (!response.ok) {
+        throw new Error(evaluation.error || 'Failed to evaluate answer')
+      }
 
       const newResults = [...results, {
         question: currentQuestion,

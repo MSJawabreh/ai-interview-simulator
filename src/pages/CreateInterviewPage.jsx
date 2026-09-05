@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import FocusedLayout from '../components/FocusedLayout'
+import { API_URL } from '../config'
 
 function CreateInterviewPage() {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ function CreateInterviewPage() {
     setErrorMessage('')
 
     try {
-      const response = await fetch('http://localhost:3000/generate-questions', {
+      const response = await fetch(`${API_URL}/generate-questions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role, numQuestions: Number(numQuestions) || 3, interviewType })
