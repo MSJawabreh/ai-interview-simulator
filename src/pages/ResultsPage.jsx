@@ -1,6 +1,7 @@
 import { useLocation, Link } from 'react-router-dom'
 import { useEffect, useRef } from 'react'
 import FocusedLayout from '../components/FocusedLayout'
+import { API_URL } from '../config'
 
 function ResultsPage() {
   const location = useLocation()
@@ -10,14 +11,12 @@ function ResultsPage() {
   useEffect(() => {
     if (results && isNew && !hasSaved.current) {
       hasSaved.current = true
-      const existing = JSON.parse(sessionStorage.getItem('interviews') || '[]')
-      const newInterview = {
-        id: crypto.randomUUID(),
-        role,
-        results,
-        date: new Date().toLocaleString()
-      }
-      sessionStorage.setItem('interviews', JSON.stringify([...existing, newInterview]))
+
+      fetch(`${API_URL}/interviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, results })
+      }).catch((err) => console.error('Failed to save interview:', err))
     }
   }, [])
 
