@@ -76,6 +76,58 @@ Return ONLY a JSON object in this exact shape, with no extra text, no markdown f
   }
 })
 
+const pool = require('./db')
+
+app.get('/db-test', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()')
+    res.json({ success: true, time: result.rows[0] })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+// Save a new interview
+app.post('/interviews', async (req, res) => {
+  const { role, results } = req.body
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO interviews (role, results) VALUES ($1, $2) RETURNING *',
+      [role, JSON.stringify(results)]
+    )
+    res.json(result.rows[0])
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Failed to save interview' })
+  }
+})
+
+// Get all interviews
+app.get('/interviews', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM interviews ORDER BY created_at DESC')
+    res.json(result.rows)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Failed to fetch interviews' })
+  }
+})
+
+// Delete an interview
+app.delete('/interviews/:id', async (req, res) => {
+  const { id } = req.params
+
+  try {
+    await pool.query('DELETE FROM interviews WHERE id = $1', [id])
+    res.json({ success: true })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Failed to delete interview' })
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
 })
