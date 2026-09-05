@@ -2,6 +2,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import CreateInterviewPage from './pages/CreateInterviewPage'
 import InterviewPage from './pages/InterviewPage'
+import ResultsPage from './pages/ResultsPage'
+import MyInterviewsPage from './pages/MyInterviewsPage'
+import LeetCodePage from './pages/LeetCodePage'
+import CodingPracticePage from './pages/CodingPracticePage'
 
 function App() {
   return (
@@ -10,6 +14,10 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/create" element={<CreateInterviewPage />} />
         <Route path="/interview" element={<InterviewPage />} />
+        <Route path="/results" element={<ResultsPage />} />
+        <Route path="/my-interviews" element={<MyInterviewsPage />} />
+        <Route path="/leetcode" element={<LeetCodePage />} />
+        <Route path="/coding-practice" element={<CodingPracticePage />} />
       </Routes>
     </BrowserRouter>
   )
