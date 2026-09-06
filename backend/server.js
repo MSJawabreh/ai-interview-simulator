@@ -128,6 +128,23 @@ app.delete('/interviews/:id', async (req, res) => {
   }
 })
 
+// Update an interview's role/name
+app.patch('/interviews/:id', async (req, res) => {
+  const { id } = req.params
+  const { role } = req.body
+
+  try {
+    const result = await pool.query(
+      'UPDATE interviews SET role = $1 WHERE id = $2 RETURNING *',
+      [role, id]
+    )
+    res.json(result.rows[0])
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Failed to update interview' })
+  }
+})
+
 const multer = require('multer')
 const pdfParse = require('pdf-parse')
 const mammoth = require('mammoth')

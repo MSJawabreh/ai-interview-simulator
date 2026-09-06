@@ -31,17 +31,27 @@ function MyInterviewsPage() {
     setEditValue(interview.role)
   }
 
-  const confirmEdit = (id) => {
-    if (editValue.trim() === '') {
-      setEditingId(null)
-      return
-    }
-    // Update locally for now — a real PATCH route can come later
-    setInterviews(interviews.map((interview) =>
-      interview.id === id ? { ...interview, role: editValue } : interview
-    ))
+const confirmEdit = (id) => {
+  if (editValue.trim() === '') {
     setEditingId(null)
+    return
   }
+
+  fetch(`${API_URL}/interviews/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role: editValue })
+  })
+    .then((res) => res.json())
+    .then((updatedInterview) => {
+      setInterviews(interviews.map((interview) =>
+        interview.id === id ? updatedInterview : interview
+      ))
+    })
+    .catch((err) => console.error('Failed to rename interview:', err))
+
+  setEditingId(null)
+}
 
   const handleClearAll = () => {
     Promise.all(interviews.map((interview) =>
