@@ -6,6 +6,8 @@ import ResultsPage from './pages/ResultsPage'
 import MyInterviewsPage from './pages/MyInterviewsPage'
 import LeetCodePage from './pages/LeetCodePage'
 import CodingPracticePage from './pages/CodingPracticePage'
+import CVExplainerPage from './pages/CVExplainerPage'
+import CVPracticePage from './pages/CVPracticePage'
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
         <Route path="/my-interviews" element={<MyInterviewsPage />} />
         <Route path="/leetcode" element={<LeetCodePage />} />
         <Route path="/coding-practice" element={<CodingPracticePage />} />
+        <Route path="/cv-explainer" element={<CVExplainerPage />} />
+        <Route path="/cv-practice" element={<CVPracticePage />} />
       </Routes>
     </BrowserRouter>
   )

@@ -11,6 +11,44 @@ function CreateInterviewPage() {
   const [interviewType, setInterviewType] = useState('Placement/Internship')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [cvFile, setCvFile] = useState(null)
+
+const handleGenerateFromCV = async () => {
+  if (!cvFile) {
+    setErrorMessage('Please select a CV file first.')
+    return
+  }
+
+  setIsLoading(true)
+  setErrorMessage('')
+
+  const formData = new FormData()
+  formData.append('cv', cvFile)
+  formData.append('role', role)
+  formData.append('numQuestions', Number(numQuestions) || 3)
+  formData.append('interviewType', interviewType)
+
+  try {
+    const response = await fetch(`${API_URL}/generate-questions-from-cv`, {
+      method: 'POST',
+      body: formData
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Something went wrong')
+    }
+
+    navigate('/interview', {
+      state: { role, questions: data.questions, isNew: true }
+    })
+  } catch (err) {
+    setErrorMessage('Failed to generate questions from CV. Try again in a moment.')
+  } finally {
+    setIsLoading(false)
+  }
+}
 
   const handleGenerate = async () => {
     setIsLoading(true)
@@ -93,6 +131,16 @@ function CreateInterviewPage() {
             <option value="Experienced">Experienced Hire</option>
           </select>
 
+          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.3rem' }}>
+            Or upload your CV (optional)
+          </label>
+          <input
+            type="file"
+            accept=".pdf,.docx"
+            onChange={(e) => setCvFile(e.target.files[0])}
+            style={{ width: '100%', marginBottom: '1.2rem' }}
+          />
+
           <button
             onClick={handleGenerate}
             style={{
@@ -112,6 +160,25 @@ function CreateInterviewPage() {
           >
             Generate Interview
           </button>
+
+          {cvFile && (
+            <button
+              onClick={handleGenerateFromCV}
+              style={{
+                width: '100%',
+                marginTop: '0.8rem',
+                background: 'white',
+                color: '#5b3df5',
+                border: '2px solid #5b3df5',
+                padding: '0.8rem',
+                borderRadius: '999px',
+                fontSize: '1rem',
+                cursor: 'pointer'
+              }}
+            >
+              Generate from CV Instead
+            </button>
+          )}
         </div>
       </div>
     </FocusedLayout>

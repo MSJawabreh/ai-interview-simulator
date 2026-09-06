@@ -42,6 +42,7 @@ function Navbar() {
         <Link to="/" style={{ color: '#333', textDecoration: 'none' }}>Home</Link>
         <Link to="/my-interviews" style={{ color: '#333', textDecoration: 'none' }}>My Interviews</Link>
         <Link to="/leetcode" style={{ color: '#333', textDecoration: 'none' }}>Coding Practice</Link>
+        <Link to="/cv-explainer" style={{ color: '#333', textDecoration: 'none' }}>CV Practice</Link>
       </div>
 
       <Link to="/create">
