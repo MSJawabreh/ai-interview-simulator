@@ -1,27 +1,29 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
+import { API_URL } from '../config'
 
 function MyInterviewsPage() {
   const navigate = useNavigate()
-  const [interviews, setInterviews] = useState(
-    JSON.parse(sessionStorage.getItem('interviews') || '[]')
-  )
+  const [interviews, setInterviews] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [editValue, setEditValue] = useState('')
+
+  useEffect(() => {
+    fetch(`${API_URL}/interviews`)
+      .then((res) => res.json())
+      .then((data) => setInterviews(data))
+      .catch((err) => console.error('Failed to load interviews:', err))
+  }, [])
 
   const getAverage = (results) => (
     (results.reduce((total, r) => total + r.score, 0) / results.length).toFixed(1)
   )
 
-  const saveInterviews = (updated) => {
-    sessionStorage.setItem('interviews', JSON.stringify(updated))
-    setInterviews(updated)
-  }
-
   const handleDelete = (id) => {
-    const updated = interviews.filter((interview) => interview.id !== id)
-    saveInterviews(updated)
+    fetch(`${API_URL}/interviews/${id}`, { method: 'DELETE' })
+      .then(() => setInterviews(interviews.filter((interview) => interview.id !== id)))
+      .catch((err) => console.error('Failed to delete interview:', err))
   }
 
   const startEditing = (interview) => {
@@ -34,16 +36,17 @@ function MyInterviewsPage() {
       setEditingId(null)
       return
     }
-    const updated = interviews.map((interview) =>
+    // Update locally for now — a real PATCH route can come later
+    setInterviews(interviews.map((interview) =>
       interview.id === id ? { ...interview, role: editValue } : interview
-    )
-    saveInterviews(updated)
+    ))
     setEditingId(null)
   }
 
   const handleClearAll = () => {
-    sessionStorage.removeItem('interviews')
-    setInterviews([])
+    Promise.all(interviews.map((interview) =>
+      fetch(`${API_URL}/interviews/${interview.id}`, { method: 'DELETE' })
+    )).then(() => setInterviews([]))
   }
 
   return (
@@ -70,10 +73,10 @@ function MyInterviewsPage() {
         </div>
 
         {interviews.length === 0 && (
-          <p>No interviews yet this session. Create one to get started.</p>
+          <p>No interviews yet. Create one to get started.</p>
         )}
 
-        {interviews.slice().reverse().map((interview) => (
+        {interviews.map((interview) => (
           <div
             key={interview.id}
             style={{
@@ -117,7 +120,7 @@ function MyInterviewsPage() {
             )}
 
             <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
-              {interview.date} · Average score: {getAverage(interview.results)} / 10
+              {new Date(interview.created_at).toLocaleString()} · Average score: {getAverage(interview.results)} / 10
             </p>
 
             <div style={{ display: 'flex', gap: '0.8rem', marginTop: '0.8rem' }}>
