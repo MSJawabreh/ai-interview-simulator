@@ -13,6 +13,35 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const requireAuth = require('./middleware/auth')
+
+app.get('/interviews', requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM interviews WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.userId]
+    )
+    res.json(result.rows)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Failed to fetch interviews' })
+  }
+})
+
+app.post('/interviews', requireAuth, async (req, res) => {
+  const { role, results } = req.body
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO interviews (role, results, user_id) VALUES ($1, $2, $3) RETURNING *',
+      [role, JSON.stringify(results), req.userId]
+    )
+    res.json(result.rows[0])
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Failed to save interview' })
+  }
+})
 
 app.post('/register', async (req, res) => {
   const { email, password } = req.body
@@ -149,39 +178,12 @@ app.get('/db-test', async (req, res) => {
   }
 })
 
-// Save a new interview
-app.post('/interviews', async (req, res) => {
-  const { role, results } = req.body
-
-  try {
-    const result = await pool.query(
-      'INSERT INTO interviews (role, results) VALUES ($1, $2) RETURNING *',
-      [role, JSON.stringify(results)]
-    )
-    res.json(result.rows[0])
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: 'Failed to save interview' })
-  }
-})
-
-// Get all interviews
-app.get('/interviews', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM interviews ORDER BY created_at DESC')
-    res.json(result.rows)
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: 'Failed to fetch interviews' })
-  }
-})
-
 // Delete an interview
-app.delete('/interviews/:id', async (req, res) => {
+app.delete('/interviews/:id', requireAuth, async (req, res) => {
   const { id } = req.params
 
   try {
-    await pool.query('DELETE FROM interviews WHERE id = $1', [id])
+    await pool.query('DELETE FROM interviews WHERE id = $1 AND user_id = $2', [id, req.userId])
     res.json({ success: true })
   } catch (error) {
     console.error(error)
@@ -190,14 +192,14 @@ app.delete('/interviews/:id', async (req, res) => {
 })
 
 // Update an interview's role/name
-app.patch('/interviews/:id', async (req, res) => {
+app.patch('/interviews/:id', requireAuth, async (req, res) => {
   const { id } = req.params
   const { role } = req.body
 
   try {
     const result = await pool.query(
-      'UPDATE interviews SET role = $1 WHERE id = $2 RETURNING *',
-      [role, id]
+      'UPDATE interviews SET role = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+      [role, id, req.userId]
     )
     res.json(result.rows[0])
   } catch (error) {
