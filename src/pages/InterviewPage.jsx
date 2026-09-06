@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import FocusedLayout from '../components/FocusedLayout'
 import { API_URL } from '../config'
+import useSpeechToText from '../hooks/useSpeechToText'
 
 
 function InterviewPage() {
@@ -14,6 +15,25 @@ function InterviewPage() {
   const [answer, setAnswer] = useState('')
   const [results, setResults] = useState([])
   const [isEvaluating, setIsEvaluating] = useState(false)
+  const { isListening, startListening, stopListening } = useSpeechToText()
+  const [interimText, setInterimText] = useState('')
+
+const handleMicClick = () => {
+  if (isListening) {
+    stopListening()
+    setInterimText('')
+  } else {
+    startListening(
+      (finalTranscript) => {
+        setAnswer((prev) => (prev ? prev + ' ' + finalTranscript : finalTranscript))
+        setInterimText('')
+      },
+      (interim) => {
+        setInterimText(interim)
+      }
+    )
+  }
+}
 
   if (!questions) {
     return (
@@ -92,7 +112,7 @@ function InterviewPage() {
           <p style={{ fontSize: '1.15rem', color: '#333' }}>{questions[currentQuestionIndex]}</p>
 
           <textarea
-            value={answer}
+            value={isListening ? (answer ? answer + ' ' + interimText : interimText) : answer}
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="Type your answer here..."
             rows={6}
@@ -107,6 +127,23 @@ function InterviewPage() {
               marginTop: '1rem'
             }}
           />
+
+          <button
+            onClick={handleMicClick}
+            type="button"
+            style={{
+              marginTop: '0.8rem',
+              background: isListening ? '#c0392b' : 'white',
+              color: isListening ? 'white' : '#5b3df5',
+              border: '2px solid #5b3df5',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '999px',
+              fontSize: '0.95rem',
+              cursor: 'pointer'
+            }}
+          >
+            {isListening ? '⏹ Stop Recording' : '🎤 Speak Answer'}
+          </button>
 
           <button
             onClick={handleNext}
