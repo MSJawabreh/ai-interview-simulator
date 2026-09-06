@@ -128,6 +128,47 @@ app.delete('/interviews/:id', async (req, res) => {
   }
 })
 
+const multer = require('multer')
+const pdfParse = require('pdf-parse')
+const mammoth = require('mammoth')
+
+const upload = multer({ storage: multer.memoryStorage() })
+
+app.post('/generate-questions-from-cv', upload.single('cv'), async (req, res) => {
+  const { role, numQuestions, interviewType } = req.body
+
+  if (!req.file) {
+    return res.status(400).json({ error: 'No CV file uploaded' })
+  }
+
+  try {
+    let cvText = ''
+
+    if (req.file.mimetype === 'application/pdf') {
+      const pdfData = await pdfParse(req.file.buffer)
+      cvText = pdfData.text
+    } else if (req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const result = await mammoth.extractRawText({ buffer: req.file.buffer })
+      cvText = result.value
+    } else {
+      return res.status(400).json({ error: 'Unsupported file type. Please upload a PDF or DOCX.' })
+    }
+
+    cvText = cvText.slice(0, 4000)
+
+    const response = await generateWithRetry(
+      `You are an interviewer. Here is the candidate's CV:\n\n${cvText}\n\nGenerate ${numQuestions} interview questions for a ${interviewType} ${role} job interview. Base at least some questions on specific projects, skills, or experience mentioned in the CV above. Return ONLY a JSON array of strings, with no extra text, no markdown formatting. Example: ["question 1", "question 2"]`
+    )
+
+    const cleanedText = response.text.replace(/```json|```/g, '').trim()
+    const questionsArray = JSON.parse(cleanedText)
+    res.json({ questions: questionsArray })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Failed to generate questions from CV' })
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
 })
