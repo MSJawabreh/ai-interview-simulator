@@ -8,6 +8,7 @@ import LeetCodePage from './pages/LeetCodePage'
 import CodingPracticePage from './pages/CodingPracticePage'
 import CVExplainerPage from './pages/CVExplainerPage'
 import CVPracticePage from './pages/CVPracticePage'
+import LoginPage from './pages/LoginPage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/coding-practice" element={<CodingPracticePage />} />
         <Route path="/cv-explainer" element={<CVExplainerPage />} />
         <Route path="/cv-practice" element={<CVPracticePage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </BrowserRouter>
   )
