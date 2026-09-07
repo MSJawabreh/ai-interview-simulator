@@ -9,6 +9,7 @@ import CodingPracticePage from './pages/CodingPracticePage'
 import CVExplainerPage from './pages/CVExplainerPage'
 import CVPracticePage from './pages/CVPracticePage'
 import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/cv-explainer" element={<CVExplainerPage />} />
         <Route path="/cv-practice" element={<CVPracticePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </BrowserRouter>
   )

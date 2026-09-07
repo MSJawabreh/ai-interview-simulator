@@ -13,3 +13,8 @@ export function removeToken() {
 export function isLoggedIn() {
   return !!getToken()
 }
+
+export function getAuthHeaders() {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}

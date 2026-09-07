@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { API_URL } from '../config'
+import { getAuthHeaders } from '../auth'
 
 function MyInterviewsPage() {
   const navigate = useNavigate()
@@ -10,9 +11,17 @@ function MyInterviewsPage() {
   const [editValue, setEditValue] = useState('')
 
   useEffect(() => {
-    fetch(`${API_URL}/interviews`)
+    fetch(`${API_URL}/interviews`, {
+      headers: getAuthHeaders()
+    })
       .then((res) => res.json())
-      .then((data) => setInterviews(data))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setInterviews(data)
+        } else {
+          console.error('Failed to load interviews:', data.error)
+        }
+      })
       .catch((err) => console.error('Failed to load interviews:', err))
   }, [])
 
@@ -21,7 +30,10 @@ function MyInterviewsPage() {
   )
 
   const handleDelete = (id) => {
-    fetch(`${API_URL}/interviews/${id}`, { method: 'DELETE' })
+    fetch(`${API_URL}/interviews/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    })
       .then(() => setInterviews(interviews.filter((interview) => interview.id !== id)))
       .catch((err) => console.error('Failed to delete interview:', err))
   }
@@ -31,31 +43,34 @@ function MyInterviewsPage() {
     setEditValue(interview.role)
   }
 
-const confirmEdit = (id) => {
-  if (editValue.trim() === '') {
-    setEditingId(null)
-    return
-  }
+  const confirmEdit = (id) => {
+    if (editValue.trim() === '') {
+      setEditingId(null)
+      return
+    }
 
-  fetch(`${API_URL}/interviews/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ role: editValue })
-  })
-    .then((res) => res.json())
-    .then((updatedInterview) => {
-      setInterviews(interviews.map((interview) =>
-        interview.id === id ? updatedInterview : interview
-      ))
+    fetch(`${API_URL}/interviews/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      body: JSON.stringify({ role: editValue })
     })
-    .catch((err) => console.error('Failed to rename interview:', err))
+      .then((res) => res.json())
+      .then((updatedInterview) => {
+        setInterviews(interviews.map((interview) =>
+          interview.id === id ? updatedInterview : interview
+        ))
+      })
+      .catch((err) => console.error('Failed to rename interview:', err))
 
-  setEditingId(null)
-}
+    setEditingId(null)
+  }
 
   const handleClearAll = () => {
     Promise.all(interviews.map((interview) =>
-      fetch(`${API_URL}/interviews/${interview.id}`, { method: 'DELETE' })
+      fetch(`${API_URL}/interviews/${interview.id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      })
     )).then(() => setInterviews([]))
   }
 
