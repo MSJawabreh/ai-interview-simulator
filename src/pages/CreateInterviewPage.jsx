@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import FocusedLayout from '../components/FocusedLayout'
 import { API_URL } from '../config'
+import { getAuthHeaders } from '../auth'
 
 function CreateInterviewPage() {
   const navigate = useNavigate()
@@ -30,9 +31,10 @@ const handleGenerateFromCV = async () => {
 
   try {
     const response = await fetch(`${API_URL}/generate-questions-from-cv`, {
-      method: 'POST',
-      body: formData
-    })
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: formData
+  })
 
     const data = await response.json()
 
@@ -56,10 +58,10 @@ const handleGenerateFromCV = async () => {
 
     try {
       const response = await fetch(`${API_URL}/generate-questions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, numQuestions: Number(numQuestions) || 3, interviewType })
-      })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      body: JSON.stringify({ role, numQuestions: Number(numQuestions) || 3, interviewType })
+    })
 
       const data = await response.json()
 
