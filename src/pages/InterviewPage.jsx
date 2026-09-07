@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import FocusedLayout from '../components/FocusedLayout'
 import { API_URL } from '../config'
 import useSpeechToText from '../hooks/useSpeechToText'
+import { getAuthHeaders } from '../auth'
 
 
 function InterviewPage() {
@@ -45,17 +46,17 @@ const handleMicClick = () => {
     )
   }
 
-  const handleNext = async () => {
-    setIsEvaluating(true)
+const handleNext = async () => {
+  setIsEvaluating(true)
 
-    const currentQuestion = questions[currentQuestionIndex]
+  const currentQuestion = questions[currentQuestionIndex]
 
-    try {
-      const response = await fetch(`${API_URL}/evaluate-answer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, question: currentQuestion, answer })
-      })
+  try {
+    const response = await fetch(`${API_URL}/evaluate-answer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+      body: JSON.stringify({ role, question: currentQuestion, answer })
+    })
 
       const evaluation = await response.json()
 

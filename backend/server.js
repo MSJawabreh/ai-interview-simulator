@@ -130,7 +130,7 @@ app.get('/', (req, res) => {
   res.send('Backend is running!')
 })
 
-app.post('/generate-questions', async (req, res) => {
+app.post('/generate-questions', requireAuth, async (req, res) => {
   const { role, numQuestions, interviewType } = req.body
 
   try {
@@ -147,7 +147,7 @@ app.post('/generate-questions', async (req, res) => {
   }
 })
 
-app.post('/evaluate-answer', async (req, res) => {
+app.post('/evaluate-answer', requireAuth, async (req, res) => {
   const { role, question, answer } = req.body
 
   try {
@@ -218,7 +218,7 @@ const mammoth = require('mammoth')
 
 const upload = multer({ storage: multer.memoryStorage() })
 
-app.post('/generate-questions-from-cv', upload.single('cv'), async (req, res) => {
+app.post('/generate-questions-from-cv', requireAuth, upload.single('cv'), async (req, res) => {
   const { role, numQuestions, interviewType } = req.body
 
   if (!req.file) {

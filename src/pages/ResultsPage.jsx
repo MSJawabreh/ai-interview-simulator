@@ -2,6 +2,7 @@ import { useLocation, Link } from 'react-router-dom'
 import { useEffect, useRef } from 'react'
 import FocusedLayout from '../components/FocusedLayout'
 import { API_URL } from '../config'
+import { getAuthHeaders } from '../auth'
 
 function ResultsPage() {
   const location = useLocation()
@@ -14,7 +15,7 @@ function ResultsPage() {
 
       fetch(`${API_URL}/interviews`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ role, results })
       }).catch((err) => console.error('Failed to save interview:', err))
     }
