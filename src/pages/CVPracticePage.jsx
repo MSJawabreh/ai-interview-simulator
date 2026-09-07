@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import FocusedLayout from '../components/FocusedLayout'
 import { API_URL } from '../config'
+import { getAuthHeaders } from '../auth'
 
 function CVPracticePage() {
 const navigate = useNavigate()
@@ -31,6 +32,7 @@ const handleGenerate = async () => {
 	try {
 		const response = await fetch(`${API_URL}/generate-questions-from-cv`, {
 			method: 'POST',
+			headers: getAuthHeaders(),
 			body: formData
 		})
 

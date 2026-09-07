@@ -172,16 +172,6 @@ Return ONLY a JSON object in this exact shape, with no extra text, no markdown f
 
 const pool = require('./db')
 
-app.get('/db-test', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()')
-    res.json({ success: true, time: result.rows[0] })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ success: false, error: error.message })
-  }
-})
-
 // Delete an interview
 app.delete('/interviews/:id', requireAuth, async (req, res) => {
   const { id } = req.params
@@ -216,7 +206,10 @@ const multer = require('multer')
 const pdfParse = require('pdf-parse')
 const mammoth = require('mammoth')
 
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }
+})
 
 app.post('/generate-questions-from-cv', requireAuth, upload.single('cv'), async (req, res) => {
   const { role, numQuestions, interviewType } = req.body
