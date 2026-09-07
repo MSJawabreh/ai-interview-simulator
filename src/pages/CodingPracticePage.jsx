@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import FocusedLayout from '../components/FocusedLayout'
 import { API_URL } from '../config'
+import { getAuthHeaders } from '../auth'
 
 function CodingPracticePage() {
 const navigate = useNavigate()
@@ -17,9 +18,9 @@ const handleGenerate = async () => {
 
   try {
     const response = await fetch(`${API_URL}/generate-questions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+			body: JSON.stringify({
         role: `${topic} coding problems`,
         numQuestions: Number(numQuestions) || 3,
         interviewType: 'Coding/Algorithmic'
