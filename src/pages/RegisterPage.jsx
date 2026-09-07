@@ -18,22 +18,27 @@ function RegisterPage() {
     }
   }, [])
 
-  const getPasswordStrength = () => {
-    if (password.length === 0) return 0
-    if (password.length < 6) return 1
-    if (password.length < 10) return 2
-    return 3
+const getPasswordStrength = () => {
+  if (password.length === 0) return 0
+  if (password.length < 8) return 1
+  if (password.length < 12) return 2
+  return 3
+}
+
+const strength = getPasswordStrength()
+const strengthColors = ['#ccc', '#c0392b', '#d98c00', '#2e8b57']
+const strengthLabels = ['', 'Too short (min 8)', 'Good', 'Strong']
+
+const handleRegister = async () => {
+  if (password.length < 8) {
+    setErrorMessage('Password must be at least 8 characters')
+    return
   }
 
-  const strength = getPasswordStrength()
-  const strengthColors = ['#ccc', '#c0392b', '#d98c00', '#2e8b57']
-  const strengthLabels = ['', 'Weak', 'Good', 'Strong']
-
-  const handleRegister = async () => {
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match')
-      return
-    }
+  if (password !== confirmPassword) {
+    setErrorMessage('Passwords do not match')
+    return
+  }
 
     setIsLoading(true)
     setErrorMessage('')
@@ -100,7 +105,7 @@ function RegisterPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 6 characters"
+            placeholder="At least 8 characters"
             style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', border: '1px solid #ccc', marginBottom: '0.4rem', boxSizing: 'border-box' }}
           />
 
